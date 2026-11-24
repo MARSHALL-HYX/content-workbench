@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>内容工作台</title>
+<style>
+  :root{
+    --bg:#E9EEF6; --panel:#FFFFFF; --ink:#0F172A; --muted:#64748B; --line:#E5E9F0;
+    --hero:#0B1220;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased}
+
+  /* 头部 */
+  .hero{position:relative;overflow:hidden;background:var(--hero);color:#fff;padding:38px 40px 30px}
+  .hero::before{content:"";position:absolute;inset:0;
+    background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),
+                     linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);
+    background-size:30px 30px;
+    mask-image:radial-gradient(ellipse at 70% 20%,#000 30%,transparent 75%);
+    -webkit-mask-image:radial-gradient(ellipse at 70% 20%,#000 30%,transparent 75%)}
+  .hero::after{content:"";position:absolute;width:520px;height:520px;right:-120px;top:-240px;
+    background:radial-gradient(circle,rgba(99,102,241,.42),transparent 62%)}
+  .hero-inner{position:relative;max-width:1240px;margin:0 auto;display:flex;
+    align-items:flex-start;justify-content:space-between;gap:24px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:14px}
+  .mark{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;flex:none;
+    background:linear-gradient(135deg,#6366F1,#22D3EE);color:#06111F;
+    font-weight:800;letter-spacing:-.5px;font-size:17px}
+  .brand h1{margin:0;font-size:25px;font-weight:700;letter-spacing:-.4px}
+  .brand p{margin:5px 0 0;font-size:13px;color:#94A3B8}
+  .hero-meta{text-align:right;font-size:12.5px;color:#94A3B8;line-height:1.9}
+  .hero-meta b{color:#E2E8F0;font-weight:600;font-variant-numeric:tabular-nums}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#CBD5E1;
+    font-size:12px;margin-bottom:8px}
+  .pulse{width:7px;height:7px;border-radius:50%;background:#34D399;
+    box-shadow:0 0 0 3px rgba(52,211,153,.18);flex:none}
+
+  .flowline{position:relative;max-width:1240px;margin:22px auto 0;display:flex;gap:8px;
+    flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.09);padding-top:16px}
+  .flow{display:inline-flex;align-items:baseline;gap:7px;font-size:12px;color:#94A3B8;
+    padding:4px 10px;border-radius:7px;background:rgba(255,255,255,.05);flex:none;white-space:nowrap}
+  .flow .f-time{color:#E2E8F0;font-variant-numeric:tabular-nums;font-weight:600;font-size:11.5px}
+  .flow .f-name{color:#CBD5E1}
+
+  main{max-width:1240px;margin:0 auto;padding:30px 40px 70px}
+
+  .group{margin-bottom:38px}
+  .group-head{display:flex;align-items:baseline;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .bar{width:3px;height:15px;border-radius:2px;display:inline-block;transform:translateY(1px)}
+  .group-head h2{font-size:15px;margin:0;font-weight:650;letter-spacing:.2px}
+  .group-desc{font-size:12px;color:var(--muted)}
+  .group-foot{margin-top:11px;font-size:11.5px;color:#94A3B8;letter-spacing:.02em;
+    display:flex;gap:6px;align-items:baseline}
+  .group-foot .miss{opacity:.75;font-size:11px}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+  .card{position:relative;display:flex;flex-direction:column;background:var(--panel);
+    border:0;border-radius:20px;padding:20px 22px 18px;
+    box-shadow:0 2px 10px rgba(15,23,42,.07);
+    text-decoration:none;color:inherit;
+    transition:transform .16s ease,box-shadow .16s ease,border-color .16s}
+  .card:hover{transform:translateY(-3px);
+    box-shadow:0 14px 34px rgba(15,23,42,.13)}
+  .card-top{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+  .ico{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex:none;
+    background:var(--tint);color:var(--accent)}
+  .ico svg{width:19px;height:19px}
+  .card-top h3{margin:0;font-size:15px;font-weight:650;letter-spacing:.1px}
+  .card-top .sub{margin:2px 0 0;font-size:12px;color:var(--muted);line-height:1.45}
+  .arrow{margin-left:auto;color:#C7CDD8;font-size:16px;transition:.16s;flex:none}
+  .card:hover .arrow{color:var(--accent);transform:translateX(2px)}
+  .desc2{font-size:12.5px;color:#475569;line-height:1.65;margin:0 0 12px}
+
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border-top:1px solid #EEF2F7;
+    padding-top:12px;margin-top:auto}
+  .stats.two{grid-template-columns:1fr 1fr}
+  .stats.compact .v{font-size:14px;font-weight:500;letter-spacing:0;margin-top:3px}
+  .stats .k{font-size:11px;color:var(--muted);line-height:1.4}
+  .stats .v{font-size:16px;font-weight:650;font-variant-numeric:tabular-nums;
+    letter-spacing:-.2px;margin-top:2px}
+  .stats .v.hot{color:#DC2626}
+
+  .foot-tags{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}
+  .tag{font-size:11px;padding:3px 8px;border-radius:6px;background:#F1F5F9;color:#475569}
+  .tag.live{background:#ECFDF5;color:#047857}
+  .tag.warn{background:#FEF2F2;color:#B91C1C}
+
+  .extra-links{margin:10px 0 2px}
+  .extra-links a{display:inline-block;font-size:12px;color:#3370FF;background:#F0F4FF;
+    padding:3px 10px;border-radius:12px;text-decoration:none;font-weight:500}
+  .extra-links a:hover{background:#E1E9FF}
+
+  footer{max-width:1240px;margin:0 auto;padding:0 40px 40px;color:var(--muted);font-size:12px;
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+  /* 周报弹层 */
+  .modal{position:fixed;inset:0;background:rgba(11,18,32,.68);backdrop-filter:blur(3px);
+    display:flex;align-items:center;justify-content:center;padding:32px;
+    opacity:0;pointer-events:none;transition:opacity .22s ease;z-index:90}
+  .modal.on{opacity:1;pointer-events:auto}
+  .modal-box{width:100%;max-width:1180px;height:100%;background:#fff;border-radius:16px;
+    overflow:hidden;display:flex;flex-direction:column;box-shadow:0 26px 70px rgba(0,0,0,.3);
+    transform:translateY(10px);transition:transform .22s ease}
+  .modal.on .modal-box{transform:translateY(0)}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;
+    padding:14px 20px;border-bottom:1px solid var(--line);font-size:13.5px;font-weight:600}
+  .modal-acts{display:flex;align-items:center;gap:16px}
+  .modal-acts a{color:var(--muted);text-decoration:none;font-weight:400;font-size:12.5px}
+  .modal-acts a:hover{color:var(--ink)}
+  .modal-acts button{background:none;border:1px solid var(--line);border-radius:8px;
+    padding:5px 12px;font-size:12.5px;color:var(--muted);cursor:pointer;font-family:inherit}
+  .modal-acts button:hover{background:#F1F5F9}
+  #rpFrame{flex:1;width:100%;border:0;background:#F3F5F9}
+  .rp-tip{padding:9px 20px;font-size:12px;color:#64748B;background:#FEF9EC;
+    border-bottom:1px solid var(--line);display:none}
+  .rp-tip.on{display:block}
+
+  /* 手机端（飞书内置浏览器约 375px） */
+  @media(max-width:720px){
+    .hero{padding:24px 16px 18px}
+    .hero-inner{flex-direction:column;gap:14px}
+    .brand h1{font-size:20px}
+    .hero-meta{text-align:left;font-size:11.5px;width:100%;line-height:1.75}
+    .hero-meta .pill{margin-bottom:6px}
+    .mark{width:40px;height:40px;border-radius:11px;font-size:15px}
+    .flowline{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:14px;padding-top:12px}
+    .flow{font-size:11px;padding:3px 8px;justify-content:flex-start}
+    main{padding:20px 16px 50px}
+    .group{margin-bottom:28px}
+    .group-head{margin-bottom:11px}
+    .group-head h2{font-size:14px}
+    .cards{grid-template-columns:1fr;gap:11px}
+    .card{padding:15px 15px 13px;border-radius:14px}
+    .card-top h3{font-size:14.5px}
+    .stats .v{font-size:15px}
+    footer{padding:0 16px 30px}
+    .modal{padding:0}
+    .modal-box{max-width:100%;border-radius:0;height:100vh}
+    .modal-head{padding:12px 14px;font-size:13px}
+    .rp-tip{font-size:11px;padding:8px 14px}
+  }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="hero-inner">
+    <div class="brand">
+      <div class="mark">SF</div>
+      <div>
+        <h1>内容工作台</h1>
+        <p>素材 · 数据 · 合规 · 内容生产</p>
+      </div>
+    </div>
+    <div class="hero-meta">
+      <div class="pill"><span class="pulse"></span>数据每日 09:00 自动更新</div>
+      <div>最近同步 <b>2026.11.24 21:40</b></div>
+      <div>表格 <b>7</b> · 文档 <b>3</b> · Base <b>3</b></div>
+    </div>
+  </div>
+  <div class="flowline">
+  <span class="flow" title="采集昨日投放数据，写入日报与素材明细"><span class="f-time">09:00</span><span class="f-name">千川取数</span></span>
+  <span class="flow" title="抓取审核建议，登记账户更换与违规"><span class="f-time">10-18</span><span class="f-name">素材巡检</span></span>
+  <span class="flow" title="工作台批量传送，维持内容供给"><span class="f-time">21:00</span><span class="f-name">账号维护</span></span>
+  <span class="flow" title="清理投放中素材与素材库冗余"><span class="f-time">22:00</span><span class="f-name">素材清理</span></span>
+  <span class="flow" title="八大人群 · 流失曲线 · 高光片段 · 核心数据"><span class="f-time">每周日</span><span class="f-name">周度拆解</span></span></div>
+</header>
+
+<main>
+  
+  <section class="group">
+    <div class="group-head">
+      <span class="bar" style="background:#1B7A5A"></span>
+      <h2>内容生产</h2>
+      <span class="group-desc">创意 → 脚本 → 提需 · 人工维护</span>
+    </div>
+    <div class="cards">
+      
+        <a class="card" href="https://mingzhe.feishu.cn/wiki/X3HNwl8JWiXJZJkHYnlcsO49nVe" target="_blank" style="--accent:#1B7A5A;--tint:#E8F5EF">
+          <div class="card-top">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h5"/></svg></div>
+            <div>
+              <h3>剪辑脚本</h3>
+              <p class="sub">文档</p>
+            </div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">定稿口播原句的唯一出处。测审累计达标（≥5 次）的卡审句会在对应原句上标红并挂评论。</p>
+          <div class="stats two compact"><div><div class="k">最后修改</div><div class="v">11.24</div></div><div><div class="k">维护</div><div class="v">人工</div></div></div>
+          
+          <div class="foot-tags">
+            <span class="tag">持续更新</span>
+            <span class="tag">飞书文档 · SoleFriend-脚本</span>
+          </div>
+        </a>
+        <a class="card" href="https://mingzhe.feishu.cn/wiki/AtwewKj5Gi1rIPk4elNcaEfFn0d" target="_blank" style="--accent:#1B7A5A;--tint:#E8F5EF">
+          <div class="card-top">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></div>
+            <div>
+              <h3>AI 提需库</h3>
+              <p class="sub">文档</p>
+            </div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">需要用 AI 做的素材、工具、自动化，登记在这张表里，按优先级排期。</p>
+          <div class="stats two compact"><div><div class="k">最后修改</div><div class="v">11.24</div></div><div><div class="k">维护</div><div class="v">人工</div></div></div>
+          
+          <div class="foot-tags">
+            <span class="tag">按需提交</span>
+            <span class="tag">飞书文档 · ai制作需求表</span>
+          </div>
+        </a>
+        <a class="card" href="https://mingzhe.feishu.cn/wiki/Q8xrwXNhXihe0qkkSi7capAznQc" target="_blank" style="--accent:#1B7A5A;--tint:#E8F5EF">
+          <div class="card-top">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></div>
+            <div>
+              <h3>创意收集</h3>
+              <p class="sub">电子表格</p>
+            </div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">选题、卖点、切角的素材池。想到就记进来，做片前先在这里翻一遍。</p>
+          <div class="stats two compact"><div><div class="k">最后修改</div><div class="v">11.24</div></div><div><div class="k">维护</div><div class="v">人工</div></div></div>
+          
+          <div class="foot-tags">
+            <span class="tag">随时补充</span>
+            <span class="tag">飞书表格 · sf创意收集</span>
+          </div>
+        </a>
+    </div>
+    <div class="group-foot">最后更新　2026.11.24</div>
+  </section>
+  <section class="group">
+    <div class="group-head">
+      <span class="bar" style="background:#1F5C8B"></span>
+      <h2>数据底座</h2>
+      <span class="group-desc">日更 · 所有分析的底稿</span>
+    </div>
+    <div class="cards">
+      
+        <a class="card" href="https://mingzhe.feishu.cn/base/AW2Ibb6LHab11NshdrecDkdsnrf?table=tblzQo7SsZ500xCh" target="_blank" style="--accent:#1F5C8B;--tint:#EAF2F8">
+          <div class="card-top">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h5"/></svg></div>
+            <div>
+              <h3>直播间日报</h3>
+              <p class="sub">日报数据</p>
+            </div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">账户大盘：消耗 / 成交 / ROI。T-1 主采 + T-2 回填，周一会刷上周 7 天终值。</p>
+          <div class="stats"><div><div class="k">最近日消耗</div><div class="v">3.7万</div></div><div><div class="k">成交金额</div><div class="v">6.9万</div></div><div><div class="k">ROI</div><div class="v">1.87</div></div></div>
+          
+          <div class="foot-tags">
+            <span class="tag">每天 09:00</span>
+            <span class="tag">最新 11-23 · 共 23 天</span>
+          </div>
+        </a>
+        <a class="card" href="https://mingzhe.feishu.cn/base/AW2Ibb6LHab11NshdrecDkdsnrf?table=tblmhzKuEw6Qwktn" target="_blank" style="--accent:#1F5C8B;--tint:#EAF2F8">
+          <div class="card-top">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h5"/></svg></div>
+            <div>
+              <h3>我的素材明细</h3>
+              <p class="sub">日报数据</p>
+            </div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">卡萨丁账号下每条素材的逐日明细：消耗、成交、播放率、ROI。</p>
+          <div class="stats two"><div><div class="k">素材记录</div><div class="v">120 条</div></div><div><div class="k">采集频率</div><div class="v">每天 09:00</div></div></div>
+          
+          <div class="foot-tags">
+            <span class="tag">每天 09:00</span>
+            <span class="tag">13 字段 · 26 条</span>
+          </div>
+        </a>
+    </div>
+    <div class="group-foot">最后更新　2026.11.24</div>
+  </section>
+  <section class="group">
+    <div class="group-head">
+      <span class="bar" style="background:#6B4C9A"></span>
+      <h2>周度复盘</h2>
+      <span class="group-desc">周更 · 周会选材的依据</span>
+    </div>
+    <div class="cards">
+      
+        <a class="card" href="https://mingzhe.feishu.cn/file/GsJ7b2bDrosihwxpOhlcm2IonZc" target="_blank" style="--accent:#6B4C9A;--tint:#F3EEF8">
+          <div class="card-top">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+            <div>
+              <h3>素材周览</h3>
+              <p class="sub">阅读页</p>
+            </div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">把这周的数据整理成一册：十五个素材的曲线、峰值帧、人群画像、判断与建议。需飞书权限，点开在云盘查看。</p>
+          <div class="stats"><div><div class="k">入册素材</div><div class="v">15 条</div></div><div><div class="k">覆盖区间</div><div class="v">11.14–11.20</div></div><div><div class="k">文件</div><div class="v">5.1 MB</div></div></div>
+          
+          <div class="foot-tags">
+            <span class="tag">每周日更新</span>
+            <span class="tag">飞书云盘 · 需登录</span>
+          </div>
+        </a>
+        <a class="card" href="https://mingzhe.feishu.cn/base/Atp6bpXDyaAOAGsenCkc2nApnxd?table=tblXwv2COkOtWjgS" target="_blank" style="--accent:#6B4C9A;--tint:#F3EEF8">
+          <div class="card-top">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"/><path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/></svg></div>
+            <div>
+              <h3>周期数据整合</h3>
+              <p class="sub">数据底表</p>
+            </div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">每条素材的原始数据落点：三十九个字段，曲线、峰值帧、人群、判断、视频都在这里。为复盘与分析提供数据支撑。</p>
+          <div class="stats"><div><div class="k">源数据</div><div class="v">3253 条</div></div><div><div class="k">入册</div><div class="v">15 条</div></div><div><div class="k">字段</div><div class="v">39</div></div></div>
+          
+          <div class="foot-tags">
+            <span class="tag">每周日 03:00</span>
+            <span class="tag">39 字段 · 15 条 · 数据底表</span>
+          </div>
+        </a>
+    </div>
+    <div class="group-foot">最后更新　2026.11.22</div>
+  </section>
+  <section class="group">
+    <div class="group-head">
+      <span class="bar" style="background:#B4232C"></span>
+      <h2>合规台账</h2>
+      <span class="group-desc">时时巡查，逐条留痕</span>
+    </div>
+    <div class="cards">
+      
+        <a class="card" href="https://mingzhe.feishu.cn/base/JCV4bNIaIaUfEosuoilca9ODnb5?table=tblZz8wMAOb7sJGH" target="_blank" style="--accent:#B4232C;--tint:#FBEDEA">
+          <div class="card-top">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h5"/></svg></div>
+            <div>
+              <h3>卡审记录</h3>
+              <p class="sub">合规台账</p>
+            </div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">抓取卡萨丁日常审核情况，留存拒审理由、整改方案与截图首帧。</p>
+          <div class="stats two"><div><div class="k">累计记录</div><div class="v">27 条</div></div><div><div class="k">巡查频率</div><div class="v">每小时</div></div></div>
+          
+          <div class="foot-tags">
+            <span class="tag">每时段巡检</span>
+            <span class="tag">拒审截图 + 视频首帧</span>
+          </div>
+        </a>
+        <a class="card" href="https://mingzhe.feishu.cn/base/JCV4bNIaIaUfEosuoilca9ODnb5?table=tblv995PLCwAZJm9" target="_blank" style="--accent:#B4232C;--tint:#FBEDEA">
+          <div class="card-top">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h5"/></svg></div>
+            <div>
+              <h3>扣分素材</h3>
+              <p class="sub">合规台账</p>
+            </div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">违规扣分记录，不分账户。一张截图多条违规会拆成多条。</p>
+          <div class="stats two"><div><div class="k">累计记录</div><div class="v">6 条</div></div><div><div class="k">含他人账户</div><div class="v">是</div></div></div>
+          
+          <div class="foot-tags">
+            <span class="tag">每时段巡检</span>
+            <span class="tag">含其他人账户</span>
+          </div>
+        </a>
+        <a class="card" href="https://mingzhe.feishu.cn/base/JCV4bNIaIaUfEosuoilca9ODnb5?table=tbl61mwkn8rNtHq2" target="_blank" style="--accent:#B4232C;--tint:#FBEDEA">
+          <div class="card-top">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h5"/></svg></div>
+            <div>
+              <h3>账户变更</h3>
+              <p class="sub">账户台账</p>
+            </div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">换户、换号登记。日采取数前会读这张表判断当前用哪个账户。</p>
+          <div class="stats two"><div><div class="k">累计记录</div><div class="v">2 条</div></div><div><div class="k">当前账户</div><div class="v">FS-4</div></div></div>
+          
+          <div class="foot-tags">
+            <span class="tag">发现即写</span>
+            <span class="tag">8 字段 · 1 条</span>
+          </div>
+        </a>
+        <a class="card" href="https://mingzhe.feishu.cn/base/JCV4bNIaIaUfEosuoilca9ODnb5?table=tblPTp0nWgdxvKY1" target="_blank" style="--accent:#B4232C;--tint:#FBEDEA">
+          <div class="card-top">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h5"/></svg></div>
+            <div>
+              <h3>测审记录</h3>
+              <p class="sub">合规台账</p>
+            </div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">测审户拒审原句台账。按原句累计，同一句 ≥5 次才写进脚本库评论；未达只观察。</p>
+          <div class="stats two"><div><div class="k">原句记录</div><div class="v">159 条</div></div><div><div class="k">达标线</div><div class="v">5 次</div></div></div>
+          
+          <div class="foot-tags">
+            <span class="tag">每天</span>
+            <span class="tag">7 条 · 13 字段</span>
+          </div>
+        </a>
+    </div>
+    <div class="group-foot">最后更新　2026.11.24</div>
+  </section>
+</main>
+
+<footer>
+  <span>呜咔事业部 · 卡萨丁</span>
+  <span>数据源　千川 · 飞书</span>
+</footer>
+
+<div class="modal" id="rpModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span id="rpTitle">周报网页</span>
+      <div class="modal-acts">
+        <a id="rpDrive" href="#" target="_blank">从云盘下载</a>
+        <a id="rpNew" href="#" target="_blank">新窗口打开 ↗</a>
+        <button id="rpClose">关闭 ×</button>
+      </div>
+    </div>
+    <div id="rpTip" class="rp-tip">如果这里空白，说明同目录没有周报文件 —— 点右上「从云盘下载」拿一份放到同一文件夹</div>
+    <iframe id="rpFrame" src="about:blank"></iframe>
+  </div>
+</div>
+
+<script>
+(function(){
+  var modal = document.getElementById('rpModal');
+  var frame = document.getElementById('rpFrame');
+  var title = document.getElementById('rpTitle');
+  var newTab = document.getElementById('rpNew');
+  var close = document.getElementById('rpClose');
+  var tip = document.getElementById('rpTip');      // 必须先声明，handler 里要用
+  var drive = document.getElementById('rpDrive');
+  var timer = null;
+  var openedAt = 0;
+
+  document.querySelectorAll('[data-report]').forEach(function(el){
+    el.addEventListener('click', function(e){
+      e.preventDefault();
+      var f = el.getAttribute('data-report');
+      // 发布到线上时，iframe 的相对路径不会继承 sharecode，这里手动带上
+      // 平台跳转页可能丢掉 sharecode，兜底用本 app 的固定值
+      var sc = new URLSearchParams(location.search).get('sharecode') || 'KXGDSPBZE7';
+      var full = sc ? f + '?sharecode=' + sc : f;
+      title.textContent = el.getAttribute('data-title') || '周报网页';
+      newTab.href = full;
+      drive.href = 'https://mingzhe.feishu.cn/file/Mts6bfH53obozbxDQUUcFU7Mn6d';
+      frame.src = full;
+      modal.classList.add('on');
+      document.body.style.overflow = 'hidden';
+      tip.classList.remove('on');
+      openedAt = Date.now();
+      clearTimeout(timer);
+      // 3.5 秒后检查：还是空白就提示（应对加载挂起 / 404 白屏）
+      timer = setTimeout(function () {
+        try {
+          var doc = frame.contentDocument;
+          var text = doc && doc.body ? (doc.body.innerText || '').trim() : '';
+          if (text.length < 30) tip.classList.add('on');
+        } catch (e) {
+          // 跨域拦不住说明加载了内容，视为正常
+        }
+      }, 3500);
+    });
+  });
+
+  frame.addEventListener('load', function(){
+    // file:// 下找不到文件时也会触发 load（错误页），用 contentDocument 判断
+    try {
+      var doc = frame.contentDocument;
+      var empty = !doc || !doc.body || doc.body.innerHTML.trim().length < 20;
+      tip.classList.toggle('on', empty);
+    } catch (e) { tip.classList.remove('on'); }
+  });
+
+  function hide(){
+    modal.classList.remove('on');
+    document.body.style.overflow = '';
+    clearTimeout(timer);
+    setTimeout(function(){ frame.src = 'about:blank'; }, 260);
+  }
+  close.addEventListener('click', hide);
+  modal.addEventListener('click', function(e){
+    // 打开弹层的那次点击会上浮到遮罩，这里加 400ms 保护
+    if (e.target === modal && Date.now() - openedAt > 400) hide();
+  });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') hide(); });
+})();
+</script>
+</body>
+</html>
