@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>内容工作台 · 视觉升级 Demo</title>
+<style>
+  :root{
+    --nav:#1F2329;
+    --nav-2:#2A2F37;
+    --bg:#F0F3F7;
+    --panel:#FFFFFF;
+    --ink:#1F2329;
+    --muted:#6B7280;
+    --line:#E6EAF0;
+    --accent:#2563EB;
+    --accent-soft:#EAF1FE;
+    --green:#22C55E;
+    --green-soft:#E7F8EF;
+    --red:#DC2626;
+    --red-soft:#FEF2F2;
+    --amber:#F59E0B;
+    --amber-soft:#FEF6E7;
+    --purple:#7C5CFC;
+    --purple-soft:#F1EDFF;
+    --teal:#0EA5A4;
+    --teal-soft:#E4F7F6;
+    --radius:16px;
+    --radius-sm:10px;
+    --shadow:0 1px 2px rgba(31,35,41,.04),0 2px 8px rgba(31,35,41,.06);
+    --shadow-hover:0 8px 24px rgba(31,35,41,.10);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--ink);
+    font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ============ 顶部深色导航 ============ */
+  .topnav{
+    position:sticky;top:0;z-index:50;
+    height:56px;background:var(--nav);
+    display:flex;align-items:center;padding:0 20px;gap:24px;
+    box-shadow:0 1px 0 rgba(0,0,0,.2);
+  }
+  .nav-brand{display:flex;align-items:center;gap:10px;flex:none}
+  .nav-mark{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
+    background:linear-gradient(135deg,#2563EB,#60A5FA);color:#fff;font-weight:800;font-size:13px}
+  .nav-brand b{color:#fff;font-size:15px;font-weight:600;letter-spacing:.3px}
+  .nav-tabs{display:flex;gap:4px;flex:1}
+  .nav-tab{color:#B6BCC7;font-size:13.5px;padding:7px 14px;border-radius:8px;cursor:pointer;white-space:nowrap}
+  .nav-tab:hover{color:#E8EBF0;background:rgba(255,255,255,.06)}
+  .nav-tab.on{color:#fff;background:var(--accent);font-weight:500}
+  .nav-right{display:flex;align-items:center;gap:14px;flex:none}
+  .nav-bell{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:#B6BCC7;cursor:pointer}
+  .nav-bell:hover{background:rgba(255,255,255,.08);color:#fff}
+  .nav-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#F59E0B,#F97316);
+    color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700}
+
+  /* ============ 布局 ============ */
+  .layout{display:flex;min-height:calc(100vh - 56px)}
+  .sidebar{
+    width:180px;flex:none;background:var(--panel);
+    border-right:1px solid var(--line);padding:18px 12px;
+    display:flex;flex-direction:column;gap:3px;
+    position:sticky;top:56px;height:calc(100vh - 56px);
+  }
+  .side-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:var(--radius-sm);
+    color:var(--muted);font-size:13.5px;cursor:pointer;transition:.15s}
+  .side-item:hover{background:#F5F7FA;color:var(--ink)}
+  .side-item.on{background:var(--accent-soft);color:var(--accent);font-weight:500}
+  .side-item svg{width:18px;height:18px;flex:none}
+  .side-sep{margin:12px 8px 6px;font-size:11px;color:#9CA3AF;letter-spacing:.5px}
+
+  .main{flex:1;padding:24px 28px 60px;min-width:0}
+
+  /* ============ 问候横幅 ============ */
+  .greet{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+  .greet h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.3px}
+  .greet p{margin:4px 0 0;font-size:13px;color:var(--muted)}
+  .greet-right{display:flex;align-items:center;gap:10px}
+  .date-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:999px;
+    background:var(--panel);border:1px solid var(--line);font-size:12.5px;color:var(--muted);cursor:pointer}
+
+  /* ============ 今日总览 ============ */
+  .overview{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px}
+  .ov-card{background:var(--panel);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
+  .ov-label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .ov-label .dot{width:7px;height:7px;border-radius:50%}
+  .ov-value{font-size:26px;font-weight:700;letter-spacing:-.6px;margin-top:8px;font-variant-numeric:tabular-nums}
+  .ov-sub{font-size:12px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:6px}
+  .up{color:var(--green);font-weight:600}
+  .down{color:var(--red);font-weight:600}
+
+  /* ============ 分组 ============ */
+  .group{margin-bottom:30px}
+  .group-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .group-head h2{margin:0;font-size:16px;font-weight:600}
+  .group-head .bar{width:4px;height:16px;border-radius:2px}
+  .group-head .desc{font-size:12.5px;color:var(--muted)}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+  .card{display:flex;flex-direction:column;background:var(--panel);border-radius:var(--radius);
+    padding:18px 20px;box-shadow:var(--shadow);text-decoration:none;color:inherit;
+    transition:transform .16s ease,box-shadow .16s ease}
+  .card:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover)}
+  .card-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .ico{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;flex:none;color:#fff}
+  .ico svg{width:20px;height:20px}
+  .card-top h3{margin:0;font-size:15px;font-weight:600}
+  .card-top .sub{margin:2px 0 0;font-size:12px;color:var(--muted)}
+  .arrow{margin-left:auto;color:#C3CAD4;font-size:16px;transition:.15s;flex:none}
+  .card:hover .arrow{color:var(--accent);transform:translateX(2px)}
+  .desc2{font-size:12.5px;color:#475569;line-height:1.6;margin:0 0 12px}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border-top:1px solid var(--line);
+    padding-top:12px;margin-top:auto}
+  .stats.two{grid-template-columns:1fr 1fr}
+  .stats .k{font-size:11px;color:var(--muted)}
+  .stats .v{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px}
+  .stats .v.hot{color:var(--red)}
+  .foot-tags{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}
+  .tag{font-size:11px;padding:3px 9px;border-radius:6px;background:#F3F5F8;color:#64748B}
+  .tag.live{background:var(--green-soft);color:#047857}
+  .tag.warn{background:var(--red-soft);color:#B91C1C}
+
+  footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    padding:0 4px;color:#9CA3AF;font-size:12px;border-top:1px solid var(--line);padding-top:18px}
+
+  /* ============ 响应式 ============ */
+  @media(max-width:900px){
+    .sidebar{display:none}
+    .overview{grid-template-columns:repeat(2,1fr)}
+    .nav-tabs{display:none}
+  }
+  @media(max-width:560px){
+    .main{padding:16px 14px 40px}
+    .overview{grid-template-columns:1fr 1fr;gap:10px}
+    .ov-value{font-size:22px}
+    .cards{grid-template-columns:1fr}
+    .greet h1{font-size:19px}
+  }
+</style>
+</head>
+<body>
+
+<!-- 顶部深色导航 -->
+<div class="topnav">
+  <div class="nav-brand">
+    <div class="nav-mark">SF</div>
+    <b>内容工作台</b>
+  </div>
+  <div class="nav-tabs">
+    <div class="nav-tab on">首页</div>
+    <div class="nav-tab">工作内容</div>
+    <div class="nav-tab">数据分析</div>
+    <div class="nav-tab">合规管理</div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-bell" title="通知">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </div>
+    <div class="nav-avatar">胡</div>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- 左侧导航 -->
+  <aside class="sidebar">
+    <div class="side-item on">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+      首页
+    </div>
+    <div class="side-sep">内容生产</div>
+    <div class="side-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>
+      剪辑脚本
+    </div>
+    <div class="side-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+      AI 提需库
+    </div>
+    <div class="side-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
+      创意收集
+    </div>
+    <div class="side-sep">数据</div>
+    <div class="side-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+      数据底座
+    </div>
+    <div class="side-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      周度复盘
+    </div>
+    <div class="side-sep">合规</div>
+    <div class="side-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      合规台账
+    </div>
+  </aside>
+
+  <!-- 主内容 -->
+  <main class="main">
+    <!-- 问候 -->
+    <div class="greet">
+      <div>
+        <h1>你好，下午好 👋</h1>
+        <p>素材 · 数据 · 合规 · 内容生产，一眼掌握今日状态</p>
+      </div>
+      <div class="greet-right">
+        <span class="date-chip">2026年11月24日 · 周二</span>
+      </div>
+    </div>
+
+    <!-- 今日总览 -->
+    <div class="overview">
+      <div class="ov-card">
+        <div class="ov-label"><span class="dot" style="background:#2563EB"></span>今日消耗</div>
+        <div class="ov-value">3.7万</div>
+        <div class="ov-sub"><span class="up">▲ 12.5%</span> 较昨日</div>
+      </div>
+      <div class="ov-card">
+        <div class="ov-label"><span class="dot" style="background:#22C55E"></span>今日成交</div>
+        <div class="ov-value">6.9万</div>
+        <div class="ov-sub"><span class="up">▲ 8.2%</span> 较昨日</div>
+      </div>
+      <div class="ov-card">
+        <div class="ov-label"><span class="dot" style="background:#F59E0B"></span>ROI</div>
+        <div class="ov-value">1.87</div>
+        <div class="ov-sub"><span class="up">▲ 0.13</span> 较昨日</div>
+      </div>
+      <div class="ov-card">
+        <div class="ov-label"><span class="dot" style="background:#DC2626"></span>待处理拒审</div>
+        <div class="ov-value" style="color:#DC2626">2 条</div>
+        <div class="ov-sub"><span class="down">需关注</span> 累计扣分 6</div>
+      </div>
+    </div>
+
+    <!-- 内容生产 -->
+    <section class="group">
+      <div class="group-head">
+        <span class="bar" style="background:#2563EB"></span>
+        <h2>内容生产</h2>
+        <span class="desc">创意 → 脚本 → 提需 · 人工维护</span>
+      </div>
+      <div class="cards">
+        <a class="card" href="https://mingzhe.feishu.cn/wiki/X3HNwl8JWiXJZJkHYnlcsO49nVe" target="_blank">
+          <div class="card-top">
+            <div class="ico" style="background:linear-gradient(135deg,#2563EB,#60A5FA)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>
+            </div>
+            <div><h3>剪辑脚本</h3><p class="sub">文档 · 定稿口播原句</p></div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">测审累计达标（≥5 次）的卡审句会在对应原句上标红并挂评论。</p>
+          <div class="stats two"><div><div class="k">最后修改</div><div class="v">11.24</div></div><div><div class="k">维护</div><div class="v">人工</div></div></div>
+          <div class="foot-tags"><span class="tag">持续更新</span><span class="tag">飞书文档</span></div>
+        </a>
+
+        <a class="card" href="https://mingzhe.feishu.cn/wiki/AtwewKj5Gi1rIPk4elNcaEfFn0d" target="_blank">
+          <div class="card-top">
+            <div class="ico" style="background:linear-gradient(135deg,#7C5CFC,#A78BFA)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+            </div>
+            <div><h3>AI 提需库</h3><p class="sub">文档 · 自动化需求排期</p></div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">需要用 AI 做的素材、工具、自动化，登记在这张表里，按优先级排期。</p>
+          <div class="stats two"><div><div class="k">最后修改</div><div class="v">11.24</div></div><div><div class="k">维护</div><div class="v">人工</div></div></div>
+          <div class="foot-tags"><span class="tag">按需提交</span><span class="tag">飞书文档</span></div>
+        </a>
+
+        <a class="card" href="https://mingzhe.feishu.cn/wiki/Q8xrwXNhXihe0qkkSi7capAznQc" target="_blank">
+          <div class="card-top">
+            <div class="ico" style="background:linear-gradient(135deg,#F59E0B,#FBBF24)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
+            </div>
+            <div><h3>创意收集</h3><p class="sub">电子表格 · 选题卖点池</p></div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">选题、卖点、切角的素材池。想到就记进来，做片前先在这里翻一遍。</p>
+          <div class="stats two"><div><div class="k">最后修改</div><div class="v">11.24</div></div><div><div class="k">维护</div><div class="v">人工</div></div></div>
+          <div class="foot-tags"><span class="tag">随时补充</span><span class="tag">飞书表格</span></div>
+        </a>
+      </div>
+    </section>
+
+    <!-- 数据底座 -->
+    <section class="group">
+      <div class="group-head">
+        <span class="bar" style="background:#0EA5A4"></span>
+        <h2>数据底座</h2>
+        <span class="desc">日更 · 所有分析的底稿</span>
+      </div>
+      <div class="cards">
+        <a class="card" href="https://mingzhe.feishu.cn/base/AW2Ibb6LHab11NshdrecDkdsnrf?table=tblzQo7SsZ500xCh" target="_blank">
+          <div class="card-top">
+            <div class="ico" style="background:linear-gradient(135deg,#0EA5A4,#2DD4BF)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            </div>
+            <div><h3>直播间日报</h3><p class="sub">日报数据 · 账户大盘</p></div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">账户大盘：消耗 / 成交 / ROI。T-1 主采 + T-2 回填。</p>
+          <div class="stats"><div><div class="k">最近日消耗</div><div class="v">3.7万</div></div><div><div class="k">成交金额</div><div class="v">6.9万</div></div><div><div class="k">ROI</div><div class="v">1.87</div></div></div>
+          <div class="foot-tags"><span class="tag live">每天 09:00</span><span class="tag">最新 11-23 · 共 23 天</span></div>
+        </a>
+
+        <a class="card" href="https://mingzhe.feishu.cn/base/AW2Ibb6LHab11NshdrecDkdsnrf?table=tblmhzKuEw6Qwktn" target="_blank">
+          <div class="card-top">
+            <div class="ico" style="background:linear-gradient(135deg,#2563EB,#3B82F6)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 8h8M8 12h5"/></svg>
+            </div>
+            <div><h3>我的素材明细</h3><p class="sub">日报数据 · 逐日明细</p></div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">卡萨丁账号下每条素材的逐日明细：消耗、成交、播放率、ROI。</p>
+          <div class="stats two"><div><div class="k">素材记录</div><div class="v">120 条</div></div><div><div class="k">采集频率</div><div class="v">每天 09:00</div></div></div>
+          <div class="foot-tags"><span class="tag live">每天 09:00</span><span class="tag">13 字段 · 26 条</span></div>
+        </a>
+      </div>
+    </section>
+
+    <!-- 周度复盘 -->
+    <section class="group">
+      <div class="group-head">
+        <span class="bar" style="background:#7C5CFC"></span>
+        <h2>周度复盘</h2>
+        <span class="desc">周更 · 周会选材的依据</span>
+      </div>
+      <div class="cards">
+        <a class="card" href="https://mingzhe.feishu.cn/file/GsJ7b2bDrosihwxpOhlcm2IonZc" target="_blank">
+          <div class="card-top">
+            <div class="ico" style="background:linear-gradient(135deg,#7C5CFC,#A78BFA)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            </div>
+            <div><h3>素材周览</h3><p class="sub">阅读页 · 周数据一册</p></div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">十五个素材的曲线、峰值帧、人群画像、判断与建议。</p>
+          <div class="stats"><div><div class="k">入册素材</div><div class="v">15 条</div></div><div><div class="k">覆盖区间</div><div class="v">11.14–11.20</div></div><div><div class="k">文件</div><div class="v">5.1 MB</div></div></div>
+          <div class="foot-tags"><span class="tag">每周日更新</span><span class="tag">飞书云盘</span></div>
+        </a>
+
+        <a class="card" href="https://mingzhe.feishu.cn/base/Atp6bpXDyaAOAGsenCkc2nApnxd?table=tblXwv2COkOtWjgS" target="_blank">
+          <div class="card-top">
+            <div class="ico" style="background:linear-gradient(135deg,#7C5CFC,#A78BFA)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"/><path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/></svg>
+            </div>
+            <div><h3>周期数据整合</h3><p class="sub">数据底表 · 39 字段</p></div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">每条素材的原始数据落点：曲线、峰值帧、人群、判断、视频。</p>
+          <div class="stats"><div><div class="k">源数据</div><div class="v">3253 条</div></div><div><div class="k">入册</div><div class="v">15 条</div></div><div><div class="k">字段</div><div class="v">39</div></div></div>
+          <div class="foot-tags"><span class="tag">每周日 03:00</span><span class="tag">数据底表</span></div>
+        </a>
+      </div>
+    </section>
+
+    <!-- 合规台账 -->
+    <section class="group">
+      <div class="group-head">
+        <span class="bar" style="background:#DC2626"></span>
+        <h2>合规台账</h2>
+        <span class="desc">时时巡查，逐条留痕</span>
+      </div>
+      <div class="cards">
+        <a class="card" href="https://mingzhe.feishu.cn/base/JCV4bNIaIaUfEosuoilca9ODnb5?table=tblZz8wMAOb7sJGH" target="_blank">
+          <div class="card-top">
+            <div class="ico" style="background:linear-gradient(135deg,#DC2626,#F87171)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div><h3>卡审记录</h3><p class="sub">合规台账 · 拒审留痕</p></div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">抓取卡萨丁日常审核情况，留存拒审理由、整改方案与截图首帧。</p>
+          <div class="stats two"><div><div class="k">累计记录</div><div class="v hot">27 条</div></div><div><div class="k">巡查频率</div><div class="v">每小时</div></div></div>
+          <div class="foot-tags"><span class="tag warn">每时段巡检</span><span class="tag">拒审截图 + 首帧</span></div>
+        </a>
+
+        <a class="card" href="https://mingzhe.feishu.cn/base/JCV4bNIaIaUfEosuoilca9ODnb5?table=tblv995PLCwAZJm9" target="_blank">
+          <div class="card-top">
+            <div class="ico" style="background:linear-gradient(135deg,#DC2626,#F87171)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg>
+            </div>
+            <div><h3>扣分素材</h3><p class="sub">合规台账 · 违规扣分</p></div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">违规扣分记录，不分账户。一张截图多条违规会拆成多条。</p>
+          <div class="stats two"><div><div class="k">累计记录</div><div class="v hot">6 条</div></div><div><div class="k">含他人账户</div><div class="v">是</div></div></div>
+          <div class="foot-tags"><span class="tag warn">每时段巡检</span><span class="tag">含他人账户</span></div>
+        </a>
+
+        <a class="card" href="https://mingzhe.feishu.cn/base/JCV4bNIaIaUfEosuoilca9ODnb5?table=tbl61mwkn8rNtHq2" target="_blank">
+          <div class="card-top">
+            <div class="ico" style="background:linear-gradient(135deg,#DC2626,#F87171)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div><h3>账户变更</h3><p class="sub">账户台账 · 换户登记</p></div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">换户、换号登记。日采取数前会读这张表判断当前用哪个账户。</p>
+          <div class="stats two"><div><div class="k">累计记录</div><div class="v">2 条</div></div><div><div class="k">当前账户</div><div class="v">FS-4</div></div></div>
+          <div class="foot-tags"><span class="tag">发现即写</span><span class="tag">8 字段</span></div>
+        </a>
+
+        <a class="card" href="https://mingzhe.feishu.cn/base/JCV4bNIaIaUfEosuoilca9ODnb5?table=tblPTp0nWgdxvKY1" target="_blank">
+          <div class="card-top">
+            <div class="ico" style="background:linear-gradient(135deg,#DC2626,#F87171)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h5"/></svg>
+            </div>
+            <div><h3>测审记录</h3><p class="sub">合规台账 · 拒审原句</p></div>
+            <span class="arrow">↗</span>
+          </div>
+          <p class="desc2">测审户拒审原句台账。同一句 ≥5 次才写进脚本库评论。</p>
+          <div class="stats two"><div><div class="k">原句记录</div><div class="v">159 条</div></div><div><div class="k">达标线</div><div class="v">5 次</div></div></div>
+          <div class="foot-tags"><span class="tag">每天</span><span class="tag">7 条 · 13 字段</span></div>
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      <span>呜咔事业部 · 卡萨丁</span>
+      <span>数据源　千川 · 飞书</span>
+    </footer>
+  </main>
+</div>
+
+</body>
+</html>
